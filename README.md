@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wishlist — Социальный вишлист
 
-## Getting Started
+Веб-приложение для создания и управления списками желаний с возможностью коллективного резервирования и финансирования подарков.
 
-First, run the development server:
+## Возможности
+
+- **Создание вишлистов** — списки желаний с названием, описанием и датой события
+- **Управление подарками** — добавление, редактирование, удаление товаров с ценами и ссылками
+- **Публичные ссылки** — делитесь вишлистом по ссылке `/w/[slug]` без регистрации
+- **Резервирование** — гости могут полностью зарезервировать подарок
+- **Коллективные вклады** — несколько человек могут скинуться на один подарок с отображением прогресса
+- **Анонимность** — владелец видит только статус подарка, но не кто зарезервировал
+- **Адаптивный дизайн** — mobile-first, корректно работает на всех экранах
+
+## Технологии
+
+| Категория | Технология |
+|-----------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Язык | TypeScript |
+| Стили | Tailwind CSS 4 + shadcn/ui |
+| Стейт | Zustand |
+| Формы | React Hook Form + Zod 4 |
+| Real-time | Socket.IO Client (подготовлен) |
+| HTTP | Axios (подготовлен) |
+
+## Требования
+
+- **Node.js** 18.17 или выше
+- **npm** 9 или выше
+
+## Запуск
+
+### 1. Клонирование и установка зависимостей
+
+```bash
+git clone <url-репозитория>
+cd wishlist-frontend
+npm install
+```
+
+### 2. Переменные окружения (опционально)
+
+Создайте файл `.env.local` в корне проекта. На данный момент приложение работает на mock-данных, поэтому переменные не обязательны:
+
+```env
+# URL бекенда (когда будет готов)
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+# URL WebSocket сервера (когда будет готов)
+NEXT_PUBLIC_WS_URL=http://localhost:8000
+```
+
+### 3. Запуск dev-сервера
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Сборка для продакшена
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+### 5. Линтинг
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Навигация по приложению
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| URL | Описание |
+|-----|----------|
+| `/` | Лендинг |
+| `/login` | Страница входа |
+| `/register` | Страница регистрации |
+| `/dashboard/wishlists` | Список вишлистов пользователя |
+| `/dashboard/wishlists/new` | Создание нового вишлиста |
+| `/dashboard/wishlists/[id]/edit` | Редактирование вишлиста и управление подарками |
+| `/dashboard/profile` | Профиль пользователя |
+| `/w/[slug]` | Публичная страница вишлиста (доступна без авторизации) |
 
-## Deploy on Vercel
+## Работа с mock-данными
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Приложение полностью функционально без бекенда. Данные хранятся в Zustand-сторах в памяти браузера:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Авторизация** — принимает любой email/пароль, данные сохраняются в localStorage
+- **Вишлисты** — предзаполнены 2 демо-списка с подарками в разных статусах
+- **Резервации** — работают в рамках текущей сессии
+
+Для подключения реального бекенда нужно заменить mock-вызовы в сторах (`src/store/`) на запросы через `apiClient` (`src/lib/api.ts`).
+
+## Структура проекта
+
+```
+src/
+├── app/                    # Страницы (App Router)
+│   ├── (auth)/             # Группа: login, register
+│   ├── (dashboard)/        # Группа: wishlists, profile (защищено auth)
+│   └── w/[slug]/           # Публичный вишлист
+├── components/
+│   ├── ui/                 # shadcn/ui компоненты
+│   ├── features/           # Бизнес-компоненты (auth, wishlist, items)
+│   └── shared/             # Header, Footer, EmptyState, PageContainer
+├── hooks/                  # useAuth, useWishlist, useRealtime
+├── store/                  # Zustand сторы (auth, wishlist)
+├── lib/                    # Утилиты, валидации, API, Socket.IO, mock-данные
+└── types/                  # TypeScript типы
+```
