@@ -86,7 +86,11 @@ export const useWishlistStore = create<WishlistState>()((set, get) => ({
     set({ isLoading: true });
     try {
       const { data } = await apiClient.get("/wishlists");
-      set({ wishlists: data, isLoading: false });
+      const wishlists = (data as Record<string, unknown>[]).map((w) => ({
+        ...w,
+        items: (w as Record<string, unknown>).items ?? [],
+      })) as Wishlist[];
+      set({ wishlists, isLoading: false });
     } catch {
       set({ isLoading: false });
     }

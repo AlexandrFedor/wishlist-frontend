@@ -16,7 +16,7 @@ export default function LoginPage() {
           <Gift className="h-10 w-10" />
         </div>
         <CardTitle className="text-2xl">Вход</CardTitle>
-        <CardDescription>Войдите в свой аккаунт Wishlist</CardDescription>
+        <CardDescription>Войдите в свой аккаунт Вишлистович</CardDescription>
       </CardHeader>
       <CardContent>
         <LoginForm />

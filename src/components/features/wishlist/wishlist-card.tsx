@@ -124,8 +124,8 @@ export function WishlistCard({ wishlist }: WishlistCardProps) {
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="gap-1">
             <Gift className="h-3 w-3" />
-            {wishlist.items.length}{" "}
-            {wishlist.items.length === 1 ? "подарок" : "подарков"}
+            {wishlist.items?.length ?? 0}{" "}
+            {(wishlist.items?.length ?? 0) === 1 ? "подарок" : "подарков"}
           </Badge>
 
           <Badge variant={wishlist.isPublic ? "secondary" : "outline"} className="gap-1">
