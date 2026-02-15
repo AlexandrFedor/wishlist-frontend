@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import axios from "axios";
 import { registerSchema, type RegisterFormData } from "@/lib/validations";
 import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
@@ -37,8 +38,12 @@ export function RegisterForm() {
       await registerUser(data.fullName, data.email, data.password);
       toast.success("Аккаунт создан!");
       router.push("/dashboard/wishlists");
-    } catch {
-      toast.error("Ошибка регистрации. Попробуйте позже.");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        toast.error("Аккаунт с таким email уже существует.");
+      } else {
+        toast.error("Ошибка регистрации. Попробуйте позже.");
+      }
     }
   };
 

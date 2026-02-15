@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, Heart, HandCoins } from "lucide-react";
+import { Heart, HandCoins } from "lucide-react";
 import type { WishlistItem, ItemStatus } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { ITEM_STATUS_LABELS, ITEM_STATUS_VARIANTS } from "@/lib/constants";
@@ -9,6 +9,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ItemDetailModal } from "@/components/features/items/item-detail-modal";
 import { GuestReservationModal } from "./guest-reservation-modal";
 
 interface PublicItemCardProps {
@@ -21,6 +22,7 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
     useWishlist();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"full" | "partial">("full");
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const status: ItemStatus = getItemStatusForItem(item.id);
   const progress = getItemProgress(item.id);
@@ -41,7 +43,10 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg border">
+      <div
+        className="cursor-pointer overflow-hidden rounded-lg border transition-colors hover:bg-accent/50"
+        onClick={() => setDetailOpen(true)}
+      >
         {item.imageUrl && (
           <div className="aspect-[4/3] overflow-hidden">
             <img
@@ -81,7 +86,10 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
           )}
 
           {!isOwner && (
-            <div className="flex flex-wrap gap-2">
+            <div
+              className="flex flex-wrap gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
               {isAvailable && (
                 <>
                   <Button size="sm" onClick={handleReserve} className="flex-1">
@@ -110,19 +118,6 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
                   Внести вклад
                 </Button>
               )}
-
-              {item.url && (
-                <Button size="sm" variant="outline" asChild>
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Ссылка
-                  </a>
-                </Button>
-              )}
             </div>
           )}
 
@@ -137,6 +132,12 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
           )}
         </div>
       </div>
+
+      <ItemDetailModal
+        item={item}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
 
       {!isOwner && (
         <GuestReservationModal

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import axios from "axios";
 import { loginSchema, type LoginFormData } from "@/lib/validations";
 import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,19 @@ export function LoginForm() {
       await login(data.email, data.password);
       toast.success("Добро пожаловать!");
       router.push("/dashboard/wishlists");
-    } catch {
-      toast.error("Ошибка входа. Проверьте данные.");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 404) {
+          toast.error("Аккаунт с таким email не найден.");
+        } else if (status === 401) {
+          toast.error("Неверный пароль.");
+        } else {
+          toast.error("Ошибка входа. Попробуйте позже.");
+        }
+      } else {
+        toast.error("Ошибка входа. Попробуйте позже.");
+      }
     }
   };
 

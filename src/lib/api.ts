@@ -67,7 +67,9 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url ?? "";
+    const isAuthRequest = requestUrl.startsWith("/auth/");
+    if (error.response?.status === 401 && !isAuthRequest) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("auth-storage");
         window.location.href = "/login";
