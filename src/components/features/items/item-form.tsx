@@ -150,9 +150,13 @@ export function ItemForm({
                     <Input
                       type="number"
                       min={0}
-                      placeholder="0"
+                      placeholder="Укажите цену"
                       {...field}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                      value={field.value === 0 ? "" : field.value}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(val === "" ? 0 : Number(val));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
