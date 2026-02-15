@@ -145,26 +145,36 @@ export const useWishlistStore = create<WishlistState>()((set, get) => ({
 
   createWishlist: async (data: CreateWishlistData) => {
     set({ isLoading: true });
-    const { data: wishlist } = await apiClient.post<Wishlist>(
-      "/wishlists",
-      data
-    );
-    set((state) => ({
-      wishlists: [...state.wishlists, { ...wishlist, items: [] }],
-      isLoading: false,
-    }));
-    return { ...wishlist, items: [] };
+    try {
+      const { data: wishlist } = await apiClient.post<Wishlist>(
+        "/wishlists",
+        data
+      );
+      set((state) => ({
+        wishlists: [...state.wishlists, { ...wishlist, items: [] }],
+        isLoading: false,
+      }));
+      return { ...wishlist, items: [] };
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
   },
 
   updateWishlist: async (id: string, data: Partial<CreateWishlistData>) => {
     set({ isLoading: true });
-    const { data: updated } = await apiClient.put(`/wishlists/${id}`, data);
-    set((state) => ({
-      wishlists: state.wishlists.map((w) =>
-        w.id === id ? { ...w, ...updated } : w
-      ),
-      isLoading: false,
-    }));
+    try {
+      const { data: updated } = await apiClient.put(`/wishlists/${id}`, data);
+      set((state) => ({
+        wishlists: state.wishlists.map((w) =>
+          w.id === id ? { ...w, ...updated } : w
+        ),
+        isLoading: false,
+      }));
+    } catch (error) {
+      set({ isLoading: false });
+      throw error;
+    }
   },
 
   deleteWishlist: async (id: string) => {
