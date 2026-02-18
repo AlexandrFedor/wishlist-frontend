@@ -18,14 +18,11 @@ export default function EditWishlistPage({
 }) {
   const { id } = use(params);
   const wishlist = useWishlistStore((s) => s.getWishlistById(id));
-  const fetchWishlistById = useWishlistStore((s) => s.fetchWishlistById);
   const isLoading = useWishlistStore((s) => s.isLoading);
 
   useEffect(() => {
-    if (!wishlist) {
-      fetchWishlistById(id).catch(() => {});
-    }
-  }, [id, wishlist, fetchWishlistById]);
+    useWishlistStore.getState().fetchWishlistById(id).catch(() => {});
+  }, [id]);
 
   if (isLoading && !wishlist) {
     return (
