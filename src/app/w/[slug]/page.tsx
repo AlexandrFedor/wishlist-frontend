@@ -25,12 +25,20 @@ export default function PublicWishlistPage({
   const fetchWishlistBySlug = useWishlistStore((s) => s.fetchWishlistBySlug);
   const isLoading = useWishlistStore((s) => s.isLoading);
   const currentUser = useAuthStore((s) => s.user);
+  const tokens = useAuthStore((s) => s.tokens);
+  const fetchMe = useAuthStore((s) => s.fetchMe);
 
   useRealtime(slug);
 
   useEffect(() => {
     fetchWishlistBySlug(slug);
   }, [slug, fetchWishlistBySlug]);
+
+  useEffect(() => {
+    if (tokens && !currentUser) {
+      fetchMe().catch(() => {});
+    }
+  }, [tokens, currentUser, fetchMe]);
 
   const isOwner = currentUser?.id === wishlist?.userId;
 

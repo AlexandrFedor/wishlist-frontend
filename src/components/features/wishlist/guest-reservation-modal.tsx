@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 import {
   guestReservationSchema,
   type GuestReservationFormData,
@@ -86,8 +87,10 @@ export function GuestReservationModal({
       );
       form.reset();
       onOpenChange(false);
-    } catch {
-      toast.error("Ошибка. Попробуйте позже.");
+    } catch (error) {
+      const axiosError = error as AxiosError<{ detail?: string }>;
+      const message = axiosError.response?.data?.detail;
+      toast.error(message || "Ошибка. Попробуйте позже.");
     }
   };
 
