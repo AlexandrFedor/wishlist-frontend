@@ -2,13 +2,30 @@
 
 import { useState } from "react";
 import { Heart, HandCoins } from "lucide-react";
+import { toast } from "sonner";
 import type { WishlistItem, ItemStatus } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { ITEM_STATUS_LABELS, ITEM_STATUS_VARIANTS } from "@/lib/constants";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useWishlistStore } from "@/store/wishlist-store";
+import {
+  clearStoredReservationId,
+  getStoredReservationId,
+} from "@/lib/reservation-storage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ItemDetailModal } from "@/components/features/items/item-detail-modal";
 import { GuestReservationModal } from "./guest-reservation-modal";
 
@@ -20,9 +37,11 @@ interface PublicItemCardProps {
 export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
   const { getItemStatusForItem, getItemProgress, getTotalReserved } =
     useWishlist();
+  const { cancelReservation, isLoading } = useWishlistStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"full" | "partial">("full");
   const [detailOpen, setDetailOpen] = useState(false);
+  const storedReservationId = getStoredReservationId(item.id);
 
   const status: ItemStatus = getItemStatusForItem(item.id);
   const progress = getItemProgress(item.id);
@@ -39,6 +58,17 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
   const handleContribute = () => {
     setModalMode("partial");
     setModalOpen(true);
+  };
+
+  const handleCancelReservation = async () => {
+    if (!storedReservationId) return;
+    try {
+      await cancelReservation(storedReservationId, item.id);
+      clearStoredReservationId(item.id);
+      toast.success("Резервация отменена");
+    } catch {
+      toast.error("Не удалось отменить резервацию");
+    }
   };
 
   return (
@@ -117,6 +147,35 @@ export function PublicItemCard({ item, isOwner }: PublicItemCardProps) {
                   <HandCoins className="mr-2 h-4 w-4" />
                   Внести вклад
                 </Button>
+              )}
+
+              {storedReservationId && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      disabled={isLoading}
+                    >
+                      Отменить резервацию
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Отменить резервацию?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Резервация будет удалена, а подарок снова станет доступен.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Отмена</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleCancelReservation}>
+                        Отменить
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           )}

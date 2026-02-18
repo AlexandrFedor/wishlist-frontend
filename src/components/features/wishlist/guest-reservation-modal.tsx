@@ -11,6 +11,7 @@ import { useWishlistStore } from "@/store/wishlist-store";
 import { useWishlist } from "@/hooks/useWishlist";
 import type { WishlistItem } from "@/types";
 import { formatPrice, getMinContribution } from "@/lib/utils";
+import { storeReservationId } from "@/lib/reservation-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,13 +73,14 @@ export function GuestReservationModal({
     }
 
     try {
-      await reserveItem(item.id, {
+      const reservation = await reserveItem(item.id, {
         guestName: data.guestName,
         guestEmail: data.guestEmail || undefined,
         amount,
         isFullReservation: mode === "full",
         message: data.message || undefined,
       });
+      storeReservationId(item.id, reservation.id);
       toast.success(
         mode === "full" ? "Подарок зарезервирован!" : "Спасибо за вклад!"
       );

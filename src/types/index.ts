@@ -17,6 +17,8 @@ export interface Wishlist {
   slug: string;
   isPublic: boolean;
   eventDate?: string;
+  itemsCount?: number;
+  reservedCount?: number;
   items: WishlistItem[];
   createdAt: string;
   updatedAt: string;
@@ -32,6 +34,9 @@ export interface WishlistItem {
   price: number;
   currency: string;
   position: number;
+  reservedAmount?: number;
+  isFullyReserved?: boolean;
+  reservationCount?: number;
   createdAt: string;
   updatedAt: string;
 }

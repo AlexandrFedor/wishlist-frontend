@@ -26,8 +26,15 @@ export function useWishlist() {
   };
 
   const getTotalReserved = (itemId: string): number => {
+    const item = store.wishlists
+      .flatMap((w) => w.items)
+      .find((i) => i.id === itemId);
+    if (!item) return 0;
     const reservations = store.getItemReservations(itemId);
-    return reservations.reduce((sum, r) => sum + r.amount, 0);
+    if (reservations.length > 0) {
+      return reservations.reduce((sum, r) => sum + r.amount, 0);
+    }
+    return item.reservedAmount ?? 0;
   };
 
   return {

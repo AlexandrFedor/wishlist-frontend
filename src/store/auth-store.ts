@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AuthTokens, User } from "@/types";
 import { apiClient } from "@/lib/api";
+import { clearAccessTokenCookie, setAccessTokenCookie } from "@/lib/auth-cookie";
 
 interface AuthState {
   user: User | null;
@@ -36,6 +37,7 @@ export const useAuthStore = create<AuthState>()(
             { email, password }
           );
           set({ tokens });
+          setAccessTokenCookie(tokens.accessToken);
 
           const { data: user } = await apiClient.get<User>("/auth/me");
           set({ user, isLoading: false });
@@ -57,6 +59,7 @@ export const useAuthStore = create<AuthState>()(
             { email, password, fullName }
           );
           set({ tokens });
+          setAccessTokenCookie(tokens.accessToken);
 
           const { data: user } = await apiClient.get<User>("/auth/me");
           set({ user, isLoading: false });
@@ -68,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         apiClient.post("/auth/logout").catch(() => {});
+        clearAccessTokenCookie();
         set({ user: null, tokens: null });
       },
 

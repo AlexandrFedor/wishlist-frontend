@@ -1,8 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect } from "react";
 import Link from "next/link";
-import { Copy, ExternalLink } from "lucide-react";
+import { Copy, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { WishlistForm } from "@/components/features/wishlist/wishlist-form";
@@ -18,6 +18,22 @@ export default function EditWishlistPage({
 }) {
   const { id } = use(params);
   const wishlist = useWishlistStore((s) => s.getWishlistById(id));
+  const fetchWishlistById = useWishlistStore((s) => s.fetchWishlistById);
+  const isLoading = useWishlistStore((s) => s.isLoading);
+
+  useEffect(() => {
+    if (!wishlist) {
+      fetchWishlistById(id).catch(() => {});
+    }
+  }, [id, wishlist, fetchWishlistById]);
+
+  if (isLoading && !wishlist) {
+    return (
+      <PageContainer className="py-16 text-center">
+        <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+      </PageContainer>
+    );
+  }
 
   if (!wishlist) {
     return (

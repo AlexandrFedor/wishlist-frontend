@@ -43,7 +43,8 @@ interface WishlistState {
   reserveItem: (
     itemId: string,
     data: CreateReservationData
-  ) => Promise<void>;
+  ) => Promise<Reservation>;
+  cancelReservation: (reservationId: string, itemId?: string) => Promise<void>;
 }
 
 // Map backend WishlistWithItemsResponse to frontend Wishlist
@@ -70,6 +71,9 @@ function mapWishlistResponse(data: Record<string, unknown>): Wishlist {
       price: item.price as number,
       currency: item.currency as string,
       position: item.position as number,
+      reservedAmount: item.reservedAmount as number | undefined,
+      isFullyReserved: item.isFullyReserved as boolean | undefined,
+      reservationCount: item.reservationCount as number | undefined,
       createdAt: raw.createdAt as string,
       updatedAt: raw.updatedAt as string,
     })),
@@ -198,6 +202,10 @@ export const useWishlistStore = create<WishlistState>()((set, get) => ({
           ? { ...w, items: [...w.items, newItem] }
           : w
       ),
+      currentWishlist:
+        state.currentWishlist?.id === wishlistId
+          ? { ...state.currentWishlist, items: [...state.currentWishlist.items, newItem] }
+          : state.currentWishlist,
       isLoading: false,
     }));
     return newItem;
@@ -249,5 +257,41 @@ export const useWishlistStore = create<WishlistState>()((set, get) => ({
       reservations: [...state.reservations, reservation],
       isLoading: false,
     }));
+    return reservation;
+  },
+
+  cancelReservation: async (reservationId: string, itemId?: string) => {
+    set({ isLoading: true });
+    await apiClient.delete(`/reservations/${reservationId}`);
+    set((state) => {
+      const reservation = state.reservations.find((r) => r.id === reservationId);
+      const reservedDelta = reservation?.amount ?? 0;
+
+      const updateItems = (items: WishlistItem[]) =>
+        items.map((item) => {
+          if (item.id !== (itemId ?? reservation?.itemId)) return item;
+          const currentReserved = item.reservedAmount ?? 0;
+          const nextReserved = Math.max(0, currentReserved - reservedDelta);
+          const nextCount = Math.max(0, (item.reservationCount ?? 0) - 1);
+          return {
+            ...item,
+            reservedAmount: nextReserved,
+            reservationCount: nextCount,
+            isFullyReserved: nextReserved >= item.price,
+          };
+        });
+
+      return {
+        reservations: state.reservations.filter((r) => r.id !== reservationId),
+        currentWishlist: state.currentWishlist
+          ? { ...state.currentWishlist, items: updateItems(state.currentWishlist.items) }
+          : state.currentWishlist,
+        wishlists: state.wishlists.map((w) => ({
+          ...w,
+          items: updateItems(w.items),
+        })),
+        isLoading: false,
+      };
+    });
   },
 }));

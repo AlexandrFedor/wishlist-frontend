@@ -44,10 +44,14 @@ export function WishlistCard({ wishlist }: WishlistCardProps) {
     toast.success("Список удалён");
   };
 
-  const handleCopyLink = () => {
-    const url = `${window.location.origin}/w/${wishlist.slug}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Ссылка скопирована");
+  const handleCopyLink = async () => {
+    try {
+      const url = `${window.location.origin}/w/${wishlist.slug}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Ссылка скопирована");
+    } catch {
+      toast.error("Не удалось скопировать ссылку");
+    }
   };
 
   const formattedDate = wishlist.eventDate
@@ -124,8 +128,10 @@ export function WishlistCard({ wishlist }: WishlistCardProps) {
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="gap-1">
             <Gift className="h-3 w-3" />
-            {wishlist.items?.length ?? 0}{" "}
-            {(wishlist.items?.length ?? 0) === 1 ? "подарок" : "подарков"}
+            {(wishlist.itemsCount ?? wishlist.items?.length ?? 0)}{" "}
+            {(wishlist.itemsCount ?? wishlist.items?.length ?? 0) === 1
+              ? "подарок"
+              : "подарков"}
           </Badge>
 
           <Badge variant={wishlist.isPublic ? "secondary" : "outline"} className="gap-1">
@@ -136,6 +142,12 @@ export function WishlistCard({ wishlist }: WishlistCardProps) {
             )}
             {wishlist.isPublic ? "Публичный" : "Приватный"}
           </Badge>
+
+          {wishlist.reservedCount !== undefined && (
+            <Badge variant="secondary" className="gap-1">
+              Зарезервировано: {wishlist.reservedCount}
+            </Badge>
+          )}
 
           {formattedDate && (
             <Badge variant="outline" className="gap-1">

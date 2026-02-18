@@ -1,7 +1,5 @@
 import type { ItemStatus } from "@/types";
 
-export const MOCK_DELAY = 400;
-
 export const ITEM_STATUS_LABELS: Record<ItemStatus, string> = {
   available: "Доступен",
   reserved: "Зарезервирован",

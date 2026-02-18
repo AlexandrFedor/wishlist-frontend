@@ -50,8 +50,13 @@ export function getItemStatus(
   item: WishlistItem,
   reservations: Reservation[]
 ): ItemStatus {
-  const totalReserved = reservations.reduce((sum, r) => sum + r.amount, 0);
-  const hasFullReservation = reservations.some((r) => r.isFullReservation);
+  const hasReservationData = reservations.length > 0;
+  const totalReserved = hasReservationData
+    ? reservations.reduce((sum, r) => sum + r.amount, 0)
+    : (item.reservedAmount ?? 0);
+  const hasFullReservation = hasReservationData
+    ? reservations.some((r) => r.isFullReservation)
+    : (item.isFullyReserved ?? false);
 
   if (hasFullReservation || totalReserved >= item.price) {
     return totalReserved >= item.price ? "collected" : "reserved";
@@ -66,7 +71,10 @@ export function getReservationProgress(
   item: WishlistItem,
   reservations: Reservation[]
 ): number {
-  const totalReserved = reservations.reduce((sum, r) => sum + r.amount, 0);
+  const totalReserved =
+    reservations.length > 0
+      ? reservations.reduce((sum, r) => sum + r.amount, 0)
+      : (item.reservedAmount ?? 0);
   if (item.price <= 0) return 0;
   return Math.min(100, (totalReserved / item.price) * 100);
 }

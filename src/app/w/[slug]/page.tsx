@@ -2,7 +2,8 @@
 
 import { use, useEffect } from "react";
 import Link from "next/link";
-import { Calendar, Gift, ArrowLeft, Loader2 } from "lucide-react";
+import { Calendar, Gift, ArrowLeft, Loader2, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { useWishlistStore } from "@/store/wishlist-store";
 import { useAuthStore } from "@/store/auth-store";
 import { useRealtime } from "@/hooks/useRealtime";
@@ -77,6 +78,16 @@ export default function PublicWishlistPage({
       })
     : null;
 
+  const handleCopyLink = async () => {
+    try {
+      const url = `${window.location.origin}/w/${wishlist.slug}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Ссылка скопирована");
+    } catch {
+      toast.error("Не удалось скопировать ссылку");
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -84,9 +95,15 @@ export default function PublicWishlistPage({
         <PageContainer>
           {/* Hero section */}
           <div className="mb-8 text-center">
-            <h1 className="mb-2 text-3xl font-bold sm:text-4xl">
-              {wishlist.title}
-            </h1>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <h1 className="text-3xl font-bold sm:text-4xl">
+                {wishlist.title}
+              </h1>
+              <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                <Copy className="mr-2 h-4 w-4" />
+                Скопировать ссылку
+              </Button>
+            </div>
             {wishlist.description && (
               <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
                 {wishlist.description}

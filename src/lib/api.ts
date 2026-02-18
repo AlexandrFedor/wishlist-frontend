@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearAccessTokenCookie } from "@/lib/auth-cookie";
 
 // snake_case <-> camelCase converters
 function toCamelCase(str: string): string {
@@ -72,6 +73,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !isAuthRequest) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("auth-storage");
+        clearAccessTokenCookie();
         window.location.href = "/login";
       }
     }
